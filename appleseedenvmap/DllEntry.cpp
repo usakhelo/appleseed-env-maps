@@ -14,10 +14,7 @@
 
 #include "appleseedenvmap.h"
 
-extern ClassDesc2* GetappleseedenvmapDesc();
-
 HINSTANCE hInstance;
-int controlsInit = FALSE;
 
 // This function is called by Windows when the DLL is loaded.  This 
 // function may also be called many times during time critical operations
@@ -25,17 +22,17 @@ int controlsInit = FALSE;
 // do inside this function.  In the code below, note how after the DLL is
 // loaded the first time only a few statements are executed.
 
-BOOL WINAPI DllMain(HINSTANCE hinstDLL,ULONG fdwReason,LPVOID /*lpvReserved*/)
+BOOL WINAPI DllMain(HINSTANCE module, DWORD reason, LPVOID /*lpvReserved*/)
 {
-	if( fdwReason == DLL_PROCESS_ATTACH )
+	if( reason == DLL_PROCESS_ATTACH )
 	{
 		// Hang on to this DLL's instance handle.
-		hInstance = hinstDLL;
-		DisableThreadLibraryCalls(hInstance);
+		hInstance = module;
+		//DisableThreadLibraryCalls(hInstance);
 		//MaxSDK::Util::UseLanguagePackLocale();
 		// DO NOT do any initialization here. Use LibInitialize() instead.
 	}
-	return(TRUE);
+	return TRUE;
 }
 
 // This function returns a string that describes the DLL and where the user
@@ -56,7 +53,7 @@ __declspec( dllexport ) int LibNumberClasses()
 __declspec( dllexport ) ClassDesc* LibClassDesc(int i)
 {
 	switch(i) {
-		case 0: return GetappleseedenvmapDesc();
+		case 0: return &g_appleseed_appleseedenvmap_classdesc;
 		default: return 0;
 	}
 }

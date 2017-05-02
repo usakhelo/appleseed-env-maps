@@ -47,7 +47,8 @@
     </Link>
     <PostBuildEvent>
       <Command Condition="'$(Configuration)|$(Platform)'=='Hybrid|x64'">rem "$([System.IO.Path]::GetFullPath('$(MaxSdkDir)/tools/RunMUIRCT.exe'))" "$([System.IO.Path]::GetFullPath('$(TargetDir)'))\" $(TargetFileName)
-copy /Y "$(TargetPath)" "$(SolutionDir)..\..\appleseed-max2016-plugin-folder\"</Command>
+copy /Y "$(TargetPath)" "$(SolutionDir)..\..\appleseed-max2016-plugin-folder\"
+copy /Y "$(TargetPath).pdb" "$(SolutionDir)..\..\appleseed-max2016-plugin-folder\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
