@@ -14,138 +14,15 @@
 
 #include "appleseedenvmap.h"
 
-#define appleseedenvmap_CLASS_ID	Class_ID(0x52848b4a, 0x5e6cb361)
-
-#define NSUBTEX   1 // TODO: number of sub-textures supported by this plugin
-// Reference Indexes
-#define COORD_REF  0
-#define PBLOCK_REF 1
-
-class appleseedenvmap;
-
-class appleseedenvmapSampler: public MapSampler
+namespace
 {
-private:
-	appleseedenvmap* mTexture;
-public:
-	appleseedenvmapSampler() : mTexture(nullptr) { }
-	appleseedenvmapSampler(appleseedenvmap *c) { mTexture= c; }
-	~appleseedenvmapSampler() { }
-
-	void   Set(appleseedenvmap *c) { mTexture = c; }
-	AColor Sample(ShadeContext& sc, float u,float v);
-	AColor SampleFilter(ShadeContext& sc, float u,float v, float du, float dv);
-	float  SampleMono(ShadeContext& sc, float u,float v);
-	float  SampleMonoFilter(ShadeContext& sc, float u,float v, float du, float dv);
-} ;
-
-
-class appleseedenvmap : public Texmap {
-public:
-	//Constructor/Destructor
-	appleseedenvmap();
-	virtual ~appleseedenvmap();
-
-	//From MtlBase
-	virtual ParamDlg* CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp);
-	virtual BOOL SetDlgThing(ParamDlg* dlg);
-	virtual void Update(TimeValue t, Interval& valid);
-	virtual void Reset();
-	virtual Interval Validity(TimeValue t);
-	virtual ULONG LocalRequirements(int subMtlNum);
-
-	//TODO: Return the number of sub-textures
-	virtual int NumSubTexmaps() { return NSUBTEX; }
-	//TODO: Return the pointer to the 'i-th' sub-texmap
-	virtual Texmap* GetSubTexmap(int i) { return subtex[i]; }
-	virtual void SetSubTexmap(int i, Texmap *m);
-	virtual TSTR GetSubTexmapSlotName(int i);
-
-	//From Texmap
-	virtual RGBA   EvalColor(ShadeContext& sc);
-	virtual float  EvalMono(ShadeContext& sc);
-	virtual Point3 EvalNormalPerturb(ShadeContext& sc);
-
-	//TODO: Returns TRUE if this texture can be used in the interactive renderer
-	virtual BOOL SupportTexDisplay() { return FALSE; }
-	virtual void ActivateTexDisplay(BOOL onoff);
-	virtual DWORD_PTR GetActiveTexHandle(TimeValue t, TexHandleMaker& thmaker);
-	//TODO: Return UV transformation matrix for use in the viewports
-	virtual void GetUVTransform(Matrix3 &uvtrans) { uvGen->GetUVTransform(uvtrans); }
-	//TODO: Return the tiling state of the texture for use in the viewports
-	virtual int    GetTextureTiling() { return  uvGen->GetTextureTiling(); }
-	virtual int    GetUVWSource() { return uvGen->GetUVWSource(); }
-	virtual UVGen* GetTheUVGen() { return uvGen; }
-
-	//TODO: Return anim index to reference index
-	virtual int SubNumToRefNum(int subNum) { return subNum; }
-
-	// Loading/Saving
-	virtual IOResult Load(ILoad *iload);
-	virtual IOResult Save(ISave *isave);
-
-	//From Animatable
-	virtual Class_ID  ClassID() {return appleseedenvmap_CLASS_ID;}
-	virtual SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
-	virtual void GetClassName(TSTR& s) {s = GetString(IDS_CLASS_NAME);}
-
-	virtual RefTargetHandle Clone( RemapDir &remap );
-	virtual RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
-
-
-	virtual int NumSubs() { return 2 + NSUBTEX; }
-	virtual Animatable* SubAnim(int i);
-	virtual TSTR SubAnimName(int i);
-
-	// TODO: Maintain the number or references here
-	virtual int NumRefs() { return 2 + NSUBTEX; }
-	virtual RefTargetHandle GetReference(int i);
-
-
-	virtual int	NumParamBlocks() { return 1; }					// return number of ParamBlocks in this instance
-	virtual IParamBlock2* GetParamBlock(int /*i*/) { return pblock; } // return i'th ParamBlock
-	virtual IParamBlock2* GetParamBlockByID(BlockID id) { return (pblock->ID() == id) ? pblock : NULL; } // return id'd ParamBlock
-
-	virtual void DeleteThis() { delete this; }
-
-protected:
-	virtual void SetReference(int i, RefTargetHandle rtarg);
-
-private:
-	UVGen*           uvGen;           // ref 0
-	IParamBlock2*    pblock;          // ref 1
-	Texmap*          subtex[NSUBTEX]; // Other refs
-
-	static ParamDlg* uvGenDlg;
-	Interval         ivalid;
-};
-
-
-
-class appleseedenvmapClassDesc : public ClassDesc2 
-{
-public:
-	virtual int IsPublic() 							{ return TRUE; }
-	virtual void* Create(BOOL /*loading = FALSE*/) 		{ return new appleseedenvmap(); }
-	virtual const TCHAR *	ClassName() 			{ return GetString(IDS_CLASS_NAME); }
-	virtual SClass_ID SuperClassID() 				{ return TEXMAP_CLASS_ID; }
-	virtual Class_ID ClassID() 						{ return appleseedenvmap_CLASS_ID; }
-	virtual const TCHAR* Category() 				{ return GetString(IDS_CATEGORY); }
-
-	virtual const TCHAR* InternalName() 			{ return _T("appleseedenvmap"); }	// returns fixed parsable name (scripter-visible name)
-	virtual HINSTANCE HInstance() 					{ return hInstance; }					// returns owning module handle
-	
-
-};
-
+    const TCHAR* AppleseedEnvMapFriendlyClassName = _T("appleseed Environment Map");
+}
 
 ClassDesc2* GetappleseedenvmapDesc() { 
 	static appleseedenvmapClassDesc appleseedenvmapDesc;
 	return &appleseedenvmapDesc; 
 }
-
-
-
 
 enum { appleseedenvmap_params };
 
@@ -155,8 +32,6 @@ enum {
 	pb_spin,
 	pb_coords,
 };
-
-
 
 
 static ParamBlockDesc2 appleseedenvmap_param_blk ( appleseedenvmap_params, _T("params"),  0, GetappleseedenvmapDesc(), 
@@ -174,8 +49,6 @@ static ParamBlockDesc2 appleseedenvmap_param_blk ( appleseedenvmap_params, _T("p
 		p_end,
 	p_end
 	);
-
-
 
 
 ParamDlg* appleseedenvmap::uvGenDlg;
@@ -371,4 +244,32 @@ DWORD_PTR appleseedenvmap::GetActiveTexHandle(TimeValue /*t*/, TexHandleMaker& /
 {
 	//TODO: Return the texture handle to this texture map
 	return 0;
+}
+
+//
+// AppleseedDisneyMtlBrowserEntryInfo class implementation.
+//
+
+const MCHAR* AppleseedEnvMapBrowserEntryInfo::GetEntryName() const
+{
+    return AppleseedEnvMapFriendlyClassName;
+}
+
+const MCHAR* AppleseedEnvMapBrowserEntryInfo::GetEntryCategory() const
+{
+    return _T("Maps\\appleseed");
+}
+
+Bitmap* AppleseedEnvMapBrowserEntryInfo::GetEntryThumbnail() const
+{
+    // todo: implement.
+    return nullptr;
+}
+
+FPInterface* appleseedenvmapClassDesc::GetInterface(Interface_ID id)
+{
+    if (id == IMATERIAL_BROWSER_ENTRY_INFO_INTERFACE)
+        return &m_browser_entry_info;
+
+    return ClassDesc2::GetInterface(id);
 }
