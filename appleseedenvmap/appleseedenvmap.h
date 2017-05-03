@@ -34,8 +34,7 @@ extern HINSTANCE hInstance;
 
 #define NSUBTEX   1 // TODO: number of sub-textures supported by this plugin
 // Reference Indexes
-#define COORD_REF  0
-#define PBLOCK_REF 1
+#define PBLOCK_REF 0
 
 class AppleseedEnvMap;
 
@@ -85,12 +84,6 @@ public:
     virtual BOOL SupportTexDisplay() { return FALSE; }
     virtual void ActivateTexDisplay(BOOL onoff);
     virtual DWORD_PTR GetActiveTexHandle(TimeValue t, TexHandleMaker& thmaker);
-    //TODO: Return UV transformation matrix for use in the viewports
-    virtual void GetUVTransform(Matrix3 &uvtrans) { uvGen->GetUVTransform(uvtrans); }
-    //TODO: Return the tiling state of the texture for use in the viewports
-    virtual int    GetTextureTiling() { return  uvGen->GetTextureTiling(); }
-    virtual int    GetUVWSource() { return uvGen->GetUVWSource(); }
-    virtual UVGen* GetTheUVGen() { return uvGen; }
 
     //TODO: Return anim index to reference index
     virtual int SubNumToRefNum(int subNum) { return subNum; }
@@ -108,12 +101,12 @@ public:
     virtual RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
 
 
-    virtual int NumSubs() { return 2 + NSUBTEX; }
+    virtual int NumSubs() { return 1 + NSUBTEX; }
     virtual Animatable* SubAnim(int i);
     virtual TSTR SubAnimName(int i);
 
     // TODO: Maintain the number or references here
-    virtual int NumRefs() { return 2 + NSUBTEX; }
+    virtual int NumRefs() { return 1 + NSUBTEX; }
     virtual RefTargetHandle GetReference(int i);
 
 
@@ -127,11 +120,8 @@ protected:
     virtual void SetReference(int i, RefTargetHandle rtarg);
 
 private:
-    UVGen*           uvGen;           // ref 0
-    IParamBlock2*    pblock;          // ref 1
+    IParamBlock2*    pblock;          // ref 0
     Texmap*          subtex[NSUBTEX]; // Other refs
-
-    static ParamDlg* uvGenDlg;
     Interval         ivalid;
 };
 

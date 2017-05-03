@@ -25,11 +25,10 @@ enum { appleseedenvmap_params };
 
 enum {
     pb_spin,
-    pb_coords,
 };
 
 
-static ParamBlockDesc2 appleseedenvmap_param_blk(
+static ParamBlockDesc2 appleseedenvmap_param_blk (
     appleseedenvmap_params,
     _T("params"), 
     0,
@@ -44,18 +43,12 @@ static ParamBlockDesc2 appleseedenvmap_param_blk(
     p_range, 0.0f, 1000.0f,
     p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, IDC_EDIT, IDC_SPIN, 0.01f,
     p_end,
-    pb_coords, _T("coords"), TYPE_REFTARG, P_OWNERS_REF, IDS_COORDS,
-    p_refno, COORD_REF,
-    p_end,
     p_end
 );
 
-
-ParamDlg* AppleseedEnvMap::uvGenDlg;
-
 //--- appleseedenvmap -------------------------------------------------------
 AppleseedEnvMap::AppleseedEnvMap()
-    : pblock(nullptr), uvGen(nullptr)
+    : pblock(nullptr)
 {
     for (int i = 0; i < NSUBTEX; i++)
         subtex[i] = nullptr;
@@ -72,10 +65,6 @@ AppleseedEnvMap::~AppleseedEnvMap()
 //From MtlBase
 void AppleseedEnvMap::Reset()
 {
-    if (uvGen)
-        uvGen->Reset();
-    else
-        ReplaceReference(0, GetNewDefaultUVGen());
     //TODO: Reset texmap back to its default values
     ivalid.SetEmpty();
 }
@@ -104,18 +93,16 @@ Interval AppleseedEnvMap::Validity(TimeValue t)
 ParamDlg* AppleseedEnvMap::CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp)
 {
     IAutoMParamDlg* masterDlg = g_appleseed_appleseedenvmap_classdesc.CreateParamDlgs(hwMtlEdit, imp, this);
-    uvGenDlg = uvGen->CreateParamDlg(hwMtlEdit, imp);
-    masterDlg->AddDlg(uvGenDlg);
     //TODO: Set the user dialog proc of the param block, and do other initialization
     return masterDlg;
 }
 
 BOOL AppleseedEnvMap::SetDlgThing(ParamDlg* dlg)
 {
-    if (dlg == uvGenDlg)
-        uvGenDlg->SetThing(uvGen);
-    else
-        return FALSE;
+    //if (dlg == uvGenDlg)
+    //    uvGenDlg->SetThing(uvGen);
+    //else
+    //    return FALSE;
     return TRUE;
 }
 
@@ -137,8 +124,7 @@ RefTargetHandle AppleseedEnvMap::GetReference(int i)
 {
     //TODO: Return the references based on the index
     switch (i) {
-    case 0: return uvGen;
-    case 1: return pblock;
+    case 0: return pblock;
     default: return subtex[i - 2];
     }
 }
@@ -147,8 +133,7 @@ void AppleseedEnvMap::SetReference(int i, RefTargetHandle rtarg)
 {
     //TODO: Store the reference handle passed into its 'i-th' reference
     switch (i) {
-    case 0: uvGen = (UVGen *)rtarg; break;
-    case 1:	pblock = (IParamBlock2 *)rtarg; break;
+    case 0:	pblock = (IParamBlock2 *)rtarg; break;
     default: subtex[i - 2] = (Texmap *)rtarg; break;
     }
 }
@@ -159,8 +144,7 @@ RefResult AppleseedEnvMap::NotifyRefChanged(const Interval& /*changeInt*/, RefTa
     {
     case REFMSG_TARGET_DELETED:
     {
-        if (hTarget == uvGen) { uvGen = nullptr; }
-        else if (hTarget == pblock) { pblock = nullptr; }
+        if (hTarget == pblock) { pblock = nullptr; }
         else
         {
             for (int i = 0; i < NSUBTEX; i++)
@@ -193,8 +177,7 @@ Animatable* AppleseedEnvMap::SubAnim(int i)
 {
     //TODO: Return 'i-th' sub-anim
     switch (i) {
-    case 0: return uvGen;
-    case 1: return pblock;
+    case 0: return pblock;
     default: return subtex[i - 2];
     }
 }
@@ -203,8 +186,7 @@ TSTR AppleseedEnvMap::SubAnimName(int i)
 {
     //TODO: Return the sub-anim names
     switch (i) {
-    case 0: return GetString(IDS_COORDS);
-    case 1: return GetString(IDS_PARAMS);
+    case 0: return GetString(IDS_PARAMS);
     default: return GetSubTexmapTVName(i - 1);
     }
 }
@@ -242,7 +224,7 @@ Point3 AppleseedEnvMap::EvalNormalPerturb(ShadeContext& /*sc*/)
 ULONG AppleseedEnvMap::LocalRequirements(int subMtlNum)
 {
     //TODO: Specify various requirements for the material
-    return uvGen->Requirements(subMtlNum);
+    return 0;
 }
 
 void AppleseedEnvMap::ActivateTexDisplay(BOOL /*onoff*/)
