@@ -38,10 +38,15 @@ static ParamBlockDesc2 appleseedenvmap_param_blk (
     //rollout
     IDD_PANEL, IDS_PARAMS, 0, 0, NULL,
     // params
-    pb_spin, _T("spin"), TYPE_FLOAT, P_ANIMATABLE, IDS_SPIN,
-    p_default, 0.1f,
-    p_range, 0.0f, 1000.0f,
-    p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, IDC_EDIT, IDC_SPIN, 0.01f,
+    pb_spin, _T("sun_theta"), TYPE_FLOAT, P_ANIMATABLE, IDS_SPIN,
+        p_default, 45.0f,
+        p_range, 0.0f, 90.0f,
+        p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, IDC_EDIT_THETA, IDC_SPIN_THETA, 0.01f,
+    p_end,
+        pb_spin, _T("sun_phi"), TYPE_FLOAT, P_ANIMATABLE, IDS_SPIN,
+        p_default, 90.0f,
+        p_range, 0.0f, 360.0f,
+        p_ui, TYPE_SPINNER, EDITTYPE_FLOAT, IDC_EDIT_PHI, IDC_SPIN_PHI, 0.01f,
     p_end,
     p_end
 );
