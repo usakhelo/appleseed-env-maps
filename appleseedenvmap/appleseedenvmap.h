@@ -131,6 +131,62 @@ private:
     int m_sky_type;
 };
 
+
+class EnvMapParamMapDlgProc
+    : public ParamMap2UserDlgProc
+{
+public:
+    virtual void DeleteThis() override
+    {
+        delete this;
+    }
+
+    virtual INT_PTR DlgProc(
+        TimeValue   t,
+        IParamMap2* map,
+        HWND        hwnd,
+        UINT        umsg,
+        WPARAM      wparam,
+        LPARAM      lparam) override
+    {
+        switch (umsg)
+        {
+        case WM_INITDIALOG:
+            enable_disable_controls(hwnd);
+            return TRUE;
+
+        case WM_COMMAND:
+            switch (LOWORD(wparam))
+            {
+            case IDC_COMBO_SKY_TYPE:
+                switch (HIWORD(wparam))
+                {
+                case CBN_SELCHANGE:
+                    enable_disable_controls(hwnd);
+                    return TRUE;
+
+                default:
+                    return FALSE;
+                }
+
+            default:
+                return FALSE;
+            }
+
+        default:
+            return FALSE;
+        }
+    }
+
+private:
+    void enable_disable_controls(HWND hwnd)
+    {
+        auto selected = SendMessage(GetDlgItem(hwnd, IDC_COMBO_SKY_TYPE), CB_GETCURSEL, 0, 0);
+        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_GROUND_ALBEDO), selected == 0 ? TRUE : FALSE);
+        EnableWindow(GetDlgItem(hwnd, IDC_SPIN_GROUND_ALBEDO), selected == 0 ? TRUE : FALSE);
+    }
+};
+
 //
 // AppleseedEnvMap material browser info.
 //

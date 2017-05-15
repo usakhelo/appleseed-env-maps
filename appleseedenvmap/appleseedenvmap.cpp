@@ -217,7 +217,8 @@ Interval AppleseedEnvMap::Validity(TimeValue t)
 ParamDlg* AppleseedEnvMap::CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp)
 {
     IAutoMParamDlg* masterDlg = g_appleseed_appleseedenvmap_classdesc.CreateParamDlgs(hwMtlEdit, imp, this);
-    //TODO: Set the user dialog proc of the param block, and do other initialization
+    appleseedenvmap_param_blk.SetUserDlgProc(new EnvMapParamMapDlgProc());
+
     return masterDlg;
 }
 
