@@ -32,10 +32,6 @@ extern HINSTANCE hInstance;
 
 #define appleseedenvmap_CLASS_ID	Class_ID(0x52848b4a, 0x5e6cb361)
 
-#define NSUBTEX   1 // TODO: number of sub-textures supported by this plugin
-// Reference Indexes
-#define PBLOCK_REF 0
-
 class AppleseedEnvMap;
 
 class AppleseedEnvMapSampler : public MapSampler
@@ -68,61 +64,71 @@ public:
     virtual Interval Validity(TimeValue t);
     virtual ULONG LocalRequirements(int subMtlNum);
 
-    //TODO: Return the number of sub-textures
-    virtual int NumSubTexmaps() { return NSUBTEX; }
-    //TODO: Return the pointer to the 'i-th' sub-texmap
-    virtual Texmap* GetSubTexmap(int i) { return subtex[i]; }
-    virtual void SetSubTexmap(int i, Texmap *m);
-    virtual TSTR GetSubTexmapSlotName(int i);
-
-    //From Texmap
-    virtual RGBA   EvalColor(ShadeContext& sc);
-    virtual float  EvalMono(ShadeContext& sc);
-    virtual Point3 EvalNormalPerturb(ShadeContext& sc);
+    // ISubMap methods.
+    virtual int NumSubTexmaps() override;
+    virtual Texmap* GetSubTexmap(int i) override;
+    virtual void SetSubTexmap(int i, Texmap* texmap) override;
+    virtual int MapSlotType(int i) override;
+    virtual MSTR GetSubTexmapSlotName(int i) override;
 
     //TODO: Returns TRUE if this texture can be used in the interactive renderer
     virtual BOOL SupportTexDisplay() { return FALSE; }
     virtual void ActivateTexDisplay(BOOL onoff);
     virtual DWORD_PTR GetActiveTexHandle(TimeValue t, TexHandleMaker& thmaker);
 
-    //TODO: Return anim index to reference index
-    virtual int SubNumToRefNum(int subNum) { return subNum; }
-
-    // Loading/Saving
-    virtual IOResult Load(ILoad *iload);
-    virtual IOResult Save(ISave *isave);
-
     //From Animatable
-    virtual Class_ID  ClassID() { return appleseedenvmap_CLASS_ID; }
-    virtual SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
-    virtual void GetClassName(TSTR& s) { s = GetString(IDS_CLASS_NAME); }
+    virtual Class_ID  ClassID() override;
+    virtual SClass_ID SuperClassID() override;
+    virtual void GetClassName(TSTR& s) override;
+    virtual void DeleteThis() override;
 
     virtual RefTargetHandle Clone(RemapDir &remap);
-    virtual RefResult NotifyRefChanged(const Interval& changeInt, RefTargetHandle hTarget, PartID& partID, RefMessage message, BOOL propagate);
+    virtual RefResult NotifyRefChanged(
+        const Interval&     changeInt,
+        RefTargetHandle     hTarget,
+        PartID&             partID,
+        RefMessage          message,
+        BOOL                propagate) override;
+    virtual int NumRefs() override;
+    virtual RefTargetHandle GetReference(int i) override;
 
+    virtual int NumSubs() override;
+    virtual Animatable* SubAnim(int i) override;
+    virtual TSTR SubAnimName(int i) override;
+    virtual int SubNumToRefNum(int subNum) override;
 
-    virtual int NumSubs() { return 1 + NSUBTEX; }
-    virtual Animatable* SubAnim(int i);
-    virtual TSTR SubAnimName(int i);
-
-    // TODO: Maintain the number or references here
-    virtual int NumRefs() { return 1 + NSUBTEX; }
-    virtual RefTargetHandle GetReference(int i);
-
-
-    virtual int	NumParamBlocks() { return 1; }					// return number of ParamBlocks in this instance
-    virtual IParamBlock2* GetParamBlock(int /*i*/) { return pblock; } // return i'th ParamBlock
-    virtual IParamBlock2* GetParamBlockByID(BlockID id) { return (pblock->ID() == id) ? pblock : NULL; } // return id'd ParamBlock
-
-    virtual void DeleteThis() { delete this; }
+    virtual int	NumParamBlocks() override;
+    virtual IParamBlock2* GetParamBlock(int i) override;
+    virtual IParamBlock2* GetParamBlockByID(BlockID id) override;
+    
+    // Loading/Saving
+    virtual IOResult Save(ISave *isave);
+    virtual IOResult Load(ILoad *iload);
+    
+    //From Texmap
+    virtual RGBA   EvalColor(ShadeContext& sc);
+    virtual float  EvalMono(ShadeContext& sc);
+    virtual Point3 EvalNormalPerturb(ShadeContext& sc);
 
 protected:
     virtual void SetReference(int i, RefTargetHandle rtarg);
 
 private:
-    IParamBlock2*    pblock;          // ref 0
-    Texmap*          subtex[NSUBTEX]; // Other refs
-    Interval         ivalid;
+    IParamBlock2*    m_pblock;          // ref 0
+    Interval         m_params_validity;
+
+    float m_sun_theta;
+    float m_sun_phi;
+    float m_turbidity;
+    Texmap* m_turbidity_map;
+    BOOL m_turbidity_map_on;
+    float m_turb_multiplier;
+    float m_lumin_multiplier;
+    float m_lumin_gamma;
+    float m_sat_multiplier;
+    float m_horizon_shift;
+    float m_ground_albedo;
+    int m_sky_type;
 };
 
 //
@@ -143,7 +149,7 @@ class AppleseedEnvMapClassDesc : public ClassDesc2
 public:
     virtual int IsPublic() { return TRUE; }
     virtual void* Create(BOOL /*loading = FALSE*/) { return new AppleseedEnvMap(); }
-    virtual const TCHAR *	ClassName() { return GetString(IDS_CLASS_NAME); }
+    virtual const TCHAR *	ClassName() { return GetString(IDS_CLASS_NAME_CDESC); }
     virtual SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
     virtual Class_ID ClassID() { return appleseedenvmap_CLASS_ID; }
     virtual const TCHAR* Category() { return GetString(IDS_CATEGORY); }
