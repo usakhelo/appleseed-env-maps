@@ -66,8 +66,5 @@ copy /Y "$(TargetPath).pdb" "$(SolutionDir)..\..\appleseed-max2016-plugin-folder
   <ItemGroup>
     <ResourceCompile Include="appleseedenvmap.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="appleseed_env_thumb.png" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

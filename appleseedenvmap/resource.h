@@ -23,7 +23,6 @@
 #define IDS_SKY_TYPE_1                  19
 #define IDS_SKY_TYPE_2                  20
 #define IDD_ENVMAP_PANEL                101
-#define IDB_PNG1                        101
 #define IDC_CLOSEBUTTON                 1000
 #define IDC_DOSTUFF                     1000
 #define IDC_PICK_SUN                    1002

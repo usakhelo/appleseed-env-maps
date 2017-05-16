@@ -15,10 +15,11 @@ extern TCHAR *GetString(int id);
 
 extern HINSTANCE hInstance;
 
-#define appleseedenvmap_CLASS_ID	Class_ID(0x52848b4a, 0x5e6cb361)
-
 class AppleseedEnvMap : public Texmap {
 public:
+    static Class_ID get_class_id();
+
+    // Constructor.
     AppleseedEnvMap();
 
     // Animatable methods.
@@ -74,6 +75,7 @@ protected:
 private:
     IParamBlock2*    m_pblock;          // ref 0
     Interval         m_params_validity;
+    Interval         m_map_validity;
 
     float m_sun_theta;
     float m_sun_phi;
@@ -121,22 +123,20 @@ public:
     virtual const MCHAR* GetEntryName() const override;
     virtual const MCHAR* GetEntryCategory() const override;
     virtual Bitmap* GetEntryThumbnail() const override;
-    virtual bool HasEntryThumbnail()const override;
 };
 
 class AppleseedEnvMapClassDesc : public ClassDesc2
 {
 public:
-    virtual int IsPublic() { return TRUE; }
-    virtual void* Create(BOOL /*loading = FALSE*/) { return new AppleseedEnvMap(); }
-    virtual const TCHAR *	ClassName() { return GetString(IDS_CLASS_NAME_CDESC); }
-    virtual SClass_ID SuperClassID() { return TEXMAP_CLASS_ID; }
-    virtual Class_ID ClassID() { return appleseedenvmap_CLASS_ID; }
-    virtual const TCHAR* Category() { return GetString(IDS_CATEGORY); }
+    virtual int IsPublic() override;
+    virtual void* Create(BOOL /*loading = FALSE*/) override;
+    virtual const TCHAR *	ClassName() override;
+    virtual SClass_ID SuperClassID() override;
+    virtual Class_ID ClassID() override;
+    virtual const TCHAR* Category() override;
+    virtual const TCHAR* InternalName() override;
     virtual FPInterface* GetInterface(Interface_ID id) override;
-    virtual const TCHAR* InternalName() { return _T("appleseedenvmap"); }	// returns fixed parsable name (scripter-visible name)
-    virtual HINSTANCE HInstance() { return hInstance; }					// returns owning module handle
-
+    virtual HINSTANCE HInstance() override;
 private:
     AppleseedEnvMapBrowserEntryInfo m_browser_entry_info;
 };
