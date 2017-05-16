@@ -134,7 +134,6 @@ static ParamBlockDesc2 appleseedenvmap_param_blk (
     p_end
 );
 
-//--- appleseedenvmap -------------------------------------------------------
 AppleseedEnvMap::AppleseedEnvMap()
     : m_pblock(nullptr)
     , m_sun_theta(45.0f)
@@ -154,14 +153,8 @@ AppleseedEnvMap::AppleseedEnvMap()
     Reset();
 }
 
-AppleseedEnvMap::~AppleseedEnvMap()
-{
-}
-
-//From MtlBase
 void AppleseedEnvMap::Reset()
 {
-    //TODO: Reset texmap back to its default values
     m_params_validity.SetEmpty();
 }
 
@@ -203,18 +196,9 @@ Interval AppleseedEnvMap::Validity(TimeValue t)
 ParamDlg* AppleseedEnvMap::CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp)
 {
     IAutoMParamDlg* masterDlg = g_appleseed_appleseedenvmap_classdesc.CreateParamDlgs(hwMtlEdit, imp, this);
-    appleseedenvmap_param_blk.SetUserDlgProc(ParamBlockIdEnvMap, new EnvMapParamMapDlgProc());
+    appleseedenvmap_param_blk.SetUserDlgProc(new EnvMapParamMapDlgProc());
 
     return masterDlg;
-}
-
-BOOL AppleseedEnvMap::SetDlgThing(ParamDlg* dlg)
-{
-    //if (dlg == uvGenDlg)
-    //    uvGenDlg->SetThing(uvGen);
-    //else
-    //    return FALSE;
-    return TRUE;
 }
 
 int AppleseedEnvMap::NumSubTexmaps()
@@ -270,7 +254,6 @@ void AppleseedEnvMap::DeleteThis()
     delete this;
 }
 
-//From ReferenceTarget
 RefTargetHandle AppleseedEnvMap::Clone(RemapDir &remap)
 {
     AppleseedEnvMap *mnew = new AppleseedEnvMap();
@@ -387,43 +370,18 @@ IOResult AppleseedEnvMap::Load(ILoad* /*iload*/)
 
 AColor AppleseedEnvMap::EvalColor(ShadeContext& /*sc*/)
 {
-    //TODO: Evaluate the color of texture map for the context.
-    return AColor(0.0f, 0.0f, 0.0f, 0.0f);
-}
-
-float AppleseedEnvMap::EvalMono(ShadeContext& sc)
-{
-    //TODO: Evaluate the map for a "mono" channel
-    return Intens(EvalColor(sc));
+    //preview color for scanline renderer
+    return AColor(0.13f, 0.58f, 1.0f, 1.0f);
 }
 
 Point3 AppleseedEnvMap::EvalNormalPerturb(ShadeContext& /*sc*/)
 {
-    //TODO: Return the perturbation to apply to a normal for bump mapping
     return Point3(0, 0, 0);
-}
-
-ULONG AppleseedEnvMap::LocalRequirements(int subMtlNum)
-{
-    //TODO: Specify various requirements for the material
-    return 0;
-}
-
-void AppleseedEnvMap::ActivateTexDisplay(BOOL /*onoff*/)
-{
-    //TODO: Implement this only if SupportTexDisplay() returns TRUE
-}
-
-DWORD_PTR AppleseedEnvMap::GetActiveTexHandle(TimeValue /*t*/, TexHandleMaker& /*maker*/)
-{
-    //TODO: Return the texture handle to this texture map
-    return 0;
 }
 
 //
 // AppleseedEnvMapBrowserEntryInfo class implementation.
 //
-
 const MCHAR* AppleseedEnvMapBrowserEntryInfo::GetEntryName() const
 {
     return AppleseedEnvMapFriendlyClassName;
@@ -436,7 +394,84 @@ const MCHAR* AppleseedEnvMapBrowserEntryInfo::GetEntryCategory() const
 
 Bitmap* AppleseedEnvMapBrowserEntryInfo::GetEntryThumbnail() const
 {
-    return nullptr;
+    HBITMAP hBitmap = LoadBitmap(hInstance,MAKEINTRESOURCE(IDB_PNG1));
+
+    BITMAP bmp; 
+    PBITMAPINFO pbmi; 
+    WORD    cClrBits; 
+
+    // Retrieve the bitmap color format, width, and height.  
+    if (!GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&bmp)) 
+        return nullptr;
+
+    // Convert the color format to a count of bits.  
+    cClrBits = (WORD)(bmp.bmPlanes * bmp.bmBitsPixel); 
+    if (cClrBits == 1) 
+        cClrBits = 1; 
+    else if (cClrBits <= 4) 
+        cClrBits = 4; 
+    else if (cClrBits <= 8) 
+        cClrBits = 8; 
+    else if (cClrBits <= 16) 
+        cClrBits = 16; 
+    else if (cClrBits <= 24) 
+        cClrBits = 24; 
+    else cClrBits = 32; 
+
+    // Allocate memory for the BITMAPINFO structure. (This structure  
+    // contains a BITMAPINFOHEADER structure and an array of RGBQUAD  
+    // data structures.)  
+
+     if (cClrBits < 24) 
+         pbmi = (PBITMAPINFO) LocalAlloc(LPTR, 
+                    sizeof(BITMAPINFOHEADER) + 
+                    sizeof(RGBQUAD) * (1<< cClrBits)); 
+
+     // There is no RGBQUAD array for these formats: 24-bit-per-pixel or 32-bit-per-pixel 
+
+     else 
+         pbmi = (PBITMAPINFO) LocalAlloc(LPTR, 
+                    sizeof(BITMAPINFOHEADER)); 
+
+    // Initialize the fields in the BITMAPINFO structure.  
+
+    pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER); 
+    pbmi->bmiHeader.biWidth = bmp.bmWidth; 
+    pbmi->bmiHeader.biHeight = bmp.bmHeight; 
+    pbmi->bmiHeader.biPlanes = bmp.bmPlanes; 
+    pbmi->bmiHeader.biBitCount = bmp.bmBitsPixel; 
+    if (cClrBits < 24) 
+        pbmi->bmiHeader.biClrUsed = (1<<cClrBits); 
+
+    // If the bitmap is not compressed, set the BI_RGB flag.  
+    pbmi->bmiHeader.biCompression = BI_RGB; 
+
+    // Compute the number of bytes in the array of color  
+    // indices and store the result in biSizeImage.  
+    // The width must be DWORD aligned unless the bitmap is RLE 
+    // compressed. 
+    pbmi->bmiHeader.biSizeImage = ((pbmi->bmiHeader.biWidth * cClrBits +31) & ~31) /8
+                                  * pbmi->bmiHeader.biHeight; 
+    // Set biClrImportant to 0, indicating that all of the  
+    // device colors are important.  
+     pbmi->bmiHeader.biClrImportant = 0; 
+
+    BitmapInfo  biTmp;
+    biTmp.SetName(_T(""));
+	biTmp.SetType(BMM_TRUE_24);
+    biTmp.SetWidth(100);
+	biTmp.SetHeight(100);
+
+    Bitmap* bmp1 = TheManager->Create(&biTmp);
+    bmp1->FromDib(pbmi);
+    DeleteObject(hBitmap);
+    LocalFree(pbmi);
+    return bmp1;
+}
+
+bool AppleseedEnvMapBrowserEntryInfo::HasEntryThumbnail() const
+{
+    return true;
 }
 
 FPInterface* AppleseedEnvMapClassDesc::GetInterface(Interface_ID id)
@@ -454,26 +489,22 @@ INT_PTR EnvMapParamMapDlgProc::DlgProc(
         UINT        umsg,
         WPARAM      wparam,
         LPARAM      lparam)
+{
+    switch (umsg)
     {
-        switch (umsg)
+    case WM_INITDIALOG:
+        enable_disable_controls(hwnd, map);
+        return TRUE;
+
+    case WM_COMMAND:
+        switch (LOWORD(wparam))
         {
-        case WM_INITDIALOG:
-            enable_disable_controls(hwnd, map);
-            return TRUE;
-
-        case WM_COMMAND:
-            switch (LOWORD(wparam))
+        case IDC_COMBO_SKY_TYPE:
+            switch (HIWORD(wparam))
             {
-            case IDC_COMBO_SKY_TYPE:
-                switch (HIWORD(wparam))
-                {
-                case CBN_SELCHANGE:
-                    enable_disable_controls(hwnd, map);
-                    return TRUE;
-
-                default:
-                    return FALSE;
-                }
+            case CBN_SELCHANGE:
+                enable_disable_controls(hwnd, map);
+                return TRUE;
 
             default:
                 return FALSE;
@@ -482,30 +513,14 @@ INT_PTR EnvMapParamMapDlgProc::DlgProc(
         default:
             return FALSE;
         }
+
+    default:
+        return FALSE;
     }
-
-    void EnvMapParamMapDlgProc::enable_disable_controls(HWND hwnd, IParamMap2* map)
-    {
-        auto selected = SendMessage(GetDlgItem(hwnd, IDC_COMBO_SKY_TYPE), CB_GETCURSEL, 0, 0);
-	    map->Enable(ParamIdGroundAlbedo, selected == 0 ? TRUE : FALSE);
-    }
-
-AColor AppleseedEnvMapSampler::Sample(ShadeContext & sc, float u, float v)
-{
-    return AColor();
 }
 
-AColor AppleseedEnvMapSampler::SampleFilter(ShadeContext & sc, float u, float v, float du, float dv)
+void EnvMapParamMapDlgProc::enable_disable_controls(HWND hwnd, IParamMap2* map)
 {
-    return AColor();
-}
-
-float AppleseedEnvMapSampler::SampleMono(ShadeContext & sc, float u, float v)
-{
-    return 0.0f;
-}
-
-float AppleseedEnvMapSampler::SampleMonoFilter(ShadeContext & sc, float u, float v, float du, float dv)
-{
-    return 0.0f;
+    auto selected = SendMessage(GetDlgItem(hwnd, IDC_COMBO_SKY_TYPE), CB_GETCURSEL, 0, 0);
+	map->Enable(ParamIdGroundAlbedo, selected == 0 ? TRUE : FALSE);
 }

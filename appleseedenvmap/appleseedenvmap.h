@@ -17,38 +17,36 @@ extern HINSTANCE hInstance;
 
 #define appleseedenvmap_CLASS_ID	Class_ID(0x52848b4a, 0x5e6cb361)
 
-class AppleseedEnvMap;
-
-class AppleseedEnvMapSampler : public MapSampler
-{
-private:
-    AppleseedEnvMap* mTexture;
-public:
-    AppleseedEnvMapSampler() : mTexture(nullptr) { }
-    AppleseedEnvMapSampler(AppleseedEnvMap *c) { mTexture = c; }
-    ~AppleseedEnvMapSampler() { }
-
-    void   Set(AppleseedEnvMap *c) { mTexture = c; }
-    AColor Sample(ShadeContext& sc, float u, float v);
-    AColor SampleFilter(ShadeContext& sc, float u, float v, float du, float dv);
-    float  SampleMono(ShadeContext& sc, float u, float v);
-    float  SampleMonoFilter(ShadeContext& sc, float u, float v, float du, float dv);
-};
-
 class AppleseedEnvMap : public Texmap {
 public:
-    //Constructor/Destructor
     AppleseedEnvMap();
-    virtual ~AppleseedEnvMap();
 
-    //From MtlBase
-    virtual ParamDlg* CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp);
-    virtual BOOL SetDlgThing(ParamDlg* dlg);
-    virtual void Update(TimeValue t, Interval& valid);
-    virtual void Reset();
-    virtual Interval Validity(TimeValue t);
-    virtual ULONG LocalRequirements(int subMtlNum);
+    // Animatable methods.
+    virtual void DeleteThis() override;
+    virtual void GetClassName(TSTR& s) override;
+    virtual SClass_ID SuperClassID() override;
+    virtual Class_ID  ClassID() override;
+    virtual int NumSubs() override;
+    virtual Animatable* SubAnim(int i) override;
+    virtual TSTR SubAnimName(int i) override;
+    virtual int SubNumToRefNum(int subNum) override;
+    virtual int	NumParamBlocks() override;
+    virtual IParamBlock2* GetParamBlock(int i) override;
+    virtual IParamBlock2* GetParamBlockByID(BlockID id) override;
 
+    // ReferenceMaker methods.
+    virtual int NumRefs() override;
+    virtual RefTargetHandle GetReference(int i) override;
+    virtual RefResult NotifyRefChanged(
+        const Interval&     changeInt,
+        RefTargetHandle     hTarget,
+        PartID&             partID,
+        RefMessage          message,
+        BOOL                propagate) override;
+        
+    // ReferenceTarget methods.
+    virtual RefTargetHandle Clone(RemapDir &remap);
+    
     // ISubMap methods.
     virtual int NumSubTexmaps() override;
     virtual Texmap* GetSubTexmap(int i) override;
@@ -56,43 +54,18 @@ public:
     virtual int MapSlotType(int i) override;
     virtual MSTR GetSubTexmapSlotName(int i) override;
 
-    //TODO: Returns TRUE if this texture can be used in the interactive renderer
-    virtual BOOL SupportTexDisplay() { return FALSE; }
-    virtual void ActivateTexDisplay(BOOL onoff);
-    virtual DWORD_PTR GetActiveTexHandle(TimeValue t, TexHandleMaker& thmaker);
+    // MtlBase methods.
+    virtual void Update(TimeValue t, Interval& valid);
+    virtual void Reset();
+    virtual Interval Validity(TimeValue t);
+    virtual ParamDlg* CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp);
 
-    //From Animatable
-    virtual Class_ID  ClassID() override;
-    virtual SClass_ID SuperClassID() override;
-    virtual void GetClassName(TSTR& s) override;
-    virtual void DeleteThis() override;
-
-    virtual RefTargetHandle Clone(RemapDir &remap);
-    virtual RefResult NotifyRefChanged(
-        const Interval&     changeInt,
-        RefTargetHandle     hTarget,
-        PartID&             partID,
-        RefMessage          message,
-        BOOL                propagate) override;
-    virtual int NumRefs() override;
-    virtual RefTargetHandle GetReference(int i) override;
-
-    virtual int NumSubs() override;
-    virtual Animatable* SubAnim(int i) override;
-    virtual TSTR SubAnimName(int i) override;
-    virtual int SubNumToRefNum(int subNum) override;
-
-    virtual int	NumParamBlocks() override;
-    virtual IParamBlock2* GetParamBlock(int i) override;
-    virtual IParamBlock2* GetParamBlockByID(BlockID id) override;
-    
     // Loading/Saving
     virtual IOResult Save(ISave *isave);
     virtual IOResult Load(ILoad *iload);
     
     //From Texmap
     virtual RGBA   EvalColor(ShadeContext& sc);
-    virtual float  EvalMono(ShadeContext& sc);
     virtual Point3 EvalNormalPerturb(ShadeContext& sc);
 
 protected:
@@ -148,6 +121,7 @@ public:
     virtual const MCHAR* GetEntryName() const override;
     virtual const MCHAR* GetEntryCategory() const override;
     virtual Bitmap* GetEntryThumbnail() const override;
+    virtual bool HasEntryThumbnail()const override;
 };
 
 class AppleseedEnvMapClassDesc : public ClassDesc2
