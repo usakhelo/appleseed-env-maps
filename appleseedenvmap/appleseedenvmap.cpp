@@ -1,17 +1,3 @@
-//**************************************************************************/
-// Copyright (c) 1998-2007 Autodesk, Inc.
-// All rights reserved.
-//
-// These coded instructions, statements, and computer programs contain
-// unpublished proprietary information written by Autodesk, Inc., and are
-// protected by Federal copyright law. They may not be disclosed to third
-// parties or copied or duplicated in any form, in whole or in part, without
-// the prior written consent of Autodesk, Inc.
-//**************************************************************************/
-// DESCRIPTION: Appwizard generated plugin
-// AUTHOR:
-//***************************************************************************/
-
 #include "appleseedenvmap.h"
 
 namespace
@@ -217,7 +203,7 @@ Interval AppleseedEnvMap::Validity(TimeValue t)
 ParamDlg* AppleseedEnvMap::CreateParamDlg(HWND hwMtlEdit, IMtlParams* imp)
 {
     IAutoMParamDlg* masterDlg = g_appleseed_appleseedenvmap_classdesc.CreateParamDlgs(hwMtlEdit, imp, this);
-    appleseedenvmap_param_blk.SetUserDlgProc(new EnvMapParamMapDlgProc());
+    appleseedenvmap_param_blk.SetUserDlgProc(ParamBlockIdEnvMap, new EnvMapParamMapDlgProc());
 
     return masterDlg;
 }
@@ -435,7 +421,7 @@ DWORD_PTR AppleseedEnvMap::GetActiveTexHandle(TimeValue /*t*/, TexHandleMaker& /
 }
 
 //
-// AppleseedDisneyMtlBrowserEntryInfo class implementation.
+// AppleseedEnvMapBrowserEntryInfo class implementation.
 //
 
 const MCHAR* AppleseedEnvMapBrowserEntryInfo::GetEntryName() const
@@ -460,6 +446,49 @@ FPInterface* AppleseedEnvMapClassDesc::GetInterface(Interface_ID id)
 
     return ClassDesc2::GetInterface(id);
 }
+
+INT_PTR EnvMapParamMapDlgProc::DlgProc(
+        TimeValue   t,
+        IParamMap2* map,
+        HWND        hwnd,
+        UINT        umsg,
+        WPARAM      wparam,
+        LPARAM      lparam)
+    {
+        switch (umsg)
+        {
+        case WM_INITDIALOG:
+            enable_disable_controls(hwnd, map);
+            return TRUE;
+
+        case WM_COMMAND:
+            switch (LOWORD(wparam))
+            {
+            case IDC_COMBO_SKY_TYPE:
+                switch (HIWORD(wparam))
+                {
+                case CBN_SELCHANGE:
+                    enable_disable_controls(hwnd, map);
+                    return TRUE;
+
+                default:
+                    return FALSE;
+                }
+
+            default:
+                return FALSE;
+            }
+
+        default:
+            return FALSE;
+        }
+    }
+
+    void EnvMapParamMapDlgProc::enable_disable_controls(HWND hwnd, IParamMap2* map)
+    {
+        auto selected = SendMessage(GetDlgItem(hwnd, IDC_COMBO_SKY_TYPE), CB_GETCURSEL, 0, 0);
+	    map->Enable(ParamIdGroundAlbedo, selected == 0 ? TRUE : FALSE);
+    }
 
 AColor AppleseedEnvMapSampler::Sample(ShadeContext & sc, float u, float v)
 {

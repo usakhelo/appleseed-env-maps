@@ -1,19 +1,4 @@
 #pragma once
-
-//**************************************************************************/
-// Copyright (c) 1998-2007 Autodesk, Inc.
-// All rights reserved.
-// 
-// These coded instructions, statements, and computer programs contain
-// unpublished proprietary information written by Autodesk, Inc., and are
-// protected by Federal copyright law. They may not be disclosed to third
-// parties or copied or duplicated in any form, in whole or in part, without
-// the prior written consent of Autodesk, Inc.
-//**************************************************************************/
-// DESCRIPTION: Includes for Plugins
-// AUTHOR: 
-//***************************************************************************/
-
 // 3ds Max headers.
 #include "3dsmaxsdk_preinclude.h"
 #include "resource.h"
@@ -147,44 +132,9 @@ public:
         HWND        hwnd,
         UINT        umsg,
         WPARAM      wparam,
-        LPARAM      lparam) override
-    {
-        switch (umsg)
-        {
-        case WM_INITDIALOG:
-            enable_disable_controls(hwnd);
-            return TRUE;
-
-        case WM_COMMAND:
-            switch (LOWORD(wparam))
-            {
-            case IDC_COMBO_SKY_TYPE:
-                switch (HIWORD(wparam))
-                {
-                case CBN_SELCHANGE:
-                    enable_disable_controls(hwnd);
-                    return TRUE;
-
-                default:
-                    return FALSE;
-                }
-
-            default:
-                return FALSE;
-            }
-
-        default:
-            return FALSE;
-        }
-    }
-
+        LPARAM      lparam) override;
 private:
-    void enable_disable_controls(HWND hwnd)
-    {
-        auto selected = SendMessage(GetDlgItem(hwnd, IDC_COMBO_SKY_TYPE), CB_GETCURSEL, 0, 0);
-        EnableWindow(GetDlgItem(hwnd, IDC_EDIT_GROUND_ALBEDO), selected == 0 ? TRUE : FALSE);
-        EnableWindow(GetDlgItem(hwnd, IDC_SPIN_GROUND_ALBEDO), selected == 0 ? TRUE : FALSE);
-    }
+    void enable_disable_controls(HWND hwnd, IParamMap2* map);
 };
 
 //
