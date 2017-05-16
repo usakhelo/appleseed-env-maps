@@ -1,4 +1,12 @@
+// appleseed.renderer headers.
+#include "renderer/api/environmentedf.h"
+#include "renderer/api/scene.h"
+#include "renderer/api/utility.h"
+
 #include "appleseedenvmap.h"
+
+namespace asf = foundation;
+namespace asr = renderer;
 
 namespace
 {
@@ -589,4 +597,23 @@ FPInterface* AppleseedEnvMapClassDesc::GetInterface(Interface_ID id)
 HINSTANCE AppleseedEnvMapClassDesc::HInstance()
 {
     return hInstance;
+}
+
+asf::auto_release_ptr<asr::EnvironmentEDF> AppleseedEnvMap::create_envmap(const char* name)
+{
+    asr::ParamArray material_params;
+
+    material_params.insert("sun_theta", m_sun_theta);
+    material_params.insert("sun_phi", m_sun_phi);
+    material_params.insert("turbidity", m_turbidity);
+    material_params.insert("turbidity_multiplier", m_turb_multiplier);
+    material_params.insert("ground_albedo", m_ground_albedo);
+    material_params.insert("luminance_multiplier", m_lumin_multiplier);
+    material_params.insert("luminance_gamma", m_lumin_gamma);
+    material_params.insert("saturation_multiplier", m_sat_multiplier);
+    material_params.insert("horizon_shift", m_horizon_shift);
+
+    auto material = asr::HosekEnvironmentEDFFactory::static_create(name, material_params);
+
+    return material;
 }
