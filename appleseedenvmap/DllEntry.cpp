@@ -100,14 +100,6 @@ __declspec( dllexport ) ULONG LibVersion()
 // on your DLL, and send you a message.
 __declspec( dllexport ) int LibInitialize(void)
 {
-    GetCOREInterface()->Log()->LogEntry(
-            SYSLOG_DEBUG,
-            FALSE,
-            _T("appleseed"),
-            _T("[appleseed] LibInitialize %s..."));
-
-    if (load_relative_library(_T("appleseed.dll")) == nullptr)
-        return FALSE;
 	return TRUE;
 }
 

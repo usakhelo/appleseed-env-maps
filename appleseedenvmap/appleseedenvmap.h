@@ -1,8 +1,4 @@
 #pragma once
-// appleseed.foundation headers.
-#include "foundation/platform/windows.h"    // include before 3ds Max headers
-#include "renderer/api/environmentedf.h"
-
 // 3ds Max headers.
 #include "3dsmaxsdk_preinclude.h"
 #include "resource.h"
@@ -74,10 +70,6 @@ public:
     //From Texmap
     virtual RGBA   EvalColor(ShadeContext& sc);
     virtual Point3 EvalNormalPerturb(ShadeContext& sc);
-
-    //
-    __declspec(dllexport)
-    foundation::auto_release_ptr<renderer::EnvironmentEDF> create_envmap(const char* name);
 
 protected:
     virtual void SetReference(int i, RefTargetHandle rtarg);
