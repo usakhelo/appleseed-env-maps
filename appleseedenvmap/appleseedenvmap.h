@@ -1,8 +1,7 @@
 #pragma once
 // appleseed.foundation headers.
 #include "foundation/platform/windows.h"    // include before 3ds Max headers
-#include "foundation/utility/autoreleaseptr.h"
-#include "renderer/modeling/environmentedf/environmentedf.h"
+#include "renderer/api/environmentedf.h"
 
 // 3ds Max headers.
 #include "3dsmaxsdk_preinclude.h"
@@ -77,6 +76,7 @@ public:
     virtual Point3 EvalNormalPerturb(ShadeContext& sc);
 
     //
+    __declspec(dllexport)
     foundation::auto_release_ptr<renderer::EnvironmentEDF> create_envmap(const char* name);
 
 protected:

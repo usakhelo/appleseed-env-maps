@@ -1,8 +1,3 @@
-// appleseed.renderer headers.
-#include "renderer/api/environmentedf.h"
-#include "renderer/api/scene.h"
-#include "renderer/api/utility.h"
-
 #include "appleseedenvmap.h"
 
 namespace asf = foundation;

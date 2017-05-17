@@ -1,6 +1,47 @@
 #include "appleseedenvmap.h"
 
+// Windows headers.
+#include <Shlwapi.h>
+
 HINSTANCE hInstance;
+
+HINSTANCE load_relative_library(const wchar_t* filename)
+{
+    wchar_t path[MAX_PATH];
+    const DWORD path_length = sizeof(path) / sizeof(wchar_t);
+
+    if (!GetModuleFileName(hInstance, path, path_length))
+    {
+        GetCOREInterface()->Log()->LogEntry(
+            SYSLOG_ERROR,
+            FALSE,
+            _T("appleseed"),
+            _T("[appleseed] GetModuleFileName() failed."));
+        return false;
+    }
+
+    PathRemoveFileSpec(path);
+    PathAppend(path, filename);
+
+    GetCOREInterface()->Log()->LogEntry(
+        SYSLOG_DEBUG,
+        FALSE,
+        _T("appleseed"),
+        _T("[appleseed] Loading %s..."), path);
+
+    auto result = LoadLibrary(path);
+
+    if (result == nullptr)
+    {
+        GetCOREInterface()->Log()->LogEntry(
+            SYSLOG_ERROR,
+            FALSE,
+            _T("appleseed"),
+            _T("[appleseed] Failed to load %s."), path);
+    }
+
+    return result;
+}
 
 // This function is called by Windows when the DLL is loaded.  This 
 // function may also be called many times during time critical operations
@@ -59,7 +100,14 @@ __declspec( dllexport ) ULONG LibVersion()
 // on your DLL, and send you a message.
 __declspec( dllexport ) int LibInitialize(void)
 {
-	#pragma message(TODO("Perform initialization here."))
+    GetCOREInterface()->Log()->LogEntry(
+            SYSLOG_DEBUG,
+            FALSE,
+            _T("appleseed"),
+            _T("[appleseed] LibInitialize %s..."));
+
+    if (load_relative_library(_T("appleseed.dll")) == nullptr)
+        return FALSE;
 	return TRUE;
 }
 

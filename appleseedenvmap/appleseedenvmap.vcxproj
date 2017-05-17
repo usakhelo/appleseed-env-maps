@@ -40,11 +40,11 @@
       <AdditionalIncludeDirectories>$(MaxSdkInc);$(SolutionDir)..\..\appleseed\src\appleseed;$(SolutionDir)..\..\boost_1_55_0;$(SolutionDir)..\..\appleseed-deps\stage\vc11\ilmbase-debug\include;$(SolutionDir)..\..\appleseed-deps\stage\vc11\openexr-debug\include;$(SolutionDir)..\..\appleseed-deps\stage\vc11\oiio-debug\include;$(SolutionDir)..\..\appleseed-deps\stage\vc11\osl-debug\include;$(SolutionDir)..\..\appleseed-deps\stage\vc11\SeExpr-debug\include;$(SolutionDir)..\..\appleseed-deps\stage\vc11\SeExpr-release\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level4</WarningLevel>
       <StringPooling Condition="'$(Configuration)|$(Platform)'=='Hybrid|x64'">true</StringPooling>
-      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Hybrid|x64'">MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Hybrid|x64'">MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(MaxSdkLib);$(SolutionDir)..\..\appleseed\sandbox\lib\v110\Debug;$(SolutionDir)..\..\appleseed-deps\stage\vc11;$(SolutionDir)..\..\boost_1_55_0\stage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>bmm.lib;core.lib;geom.lib;gfx.lib;mesh.lib;maxutil.lib;maxscrpt.lib;manipsys.lib;paramblk2.lib;appleseed.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>bmm.lib;core.lib;geom.lib;gfx.lib;mesh.lib;maxutil.lib;maxscrpt.lib;manipsys.lib;paramblk2.lib;ShLwApi.Lib;appleseed.lib;ilmbase-debug\lib\Half.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>appleseedenvmap.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
