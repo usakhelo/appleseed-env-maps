@@ -11,8 +11,6 @@
 #include <macrorec.h>
 #include <IMaterialBrowserEntryInfo.h>
 
-extern TCHAR *GetString(int id);
-
 extern HINSTANCE hInstance;
 
 //namespace renderer  { class EnvironmentEDF; }
